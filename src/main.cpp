@@ -1,16 +1,8 @@
-#include <iostream>
-#include "../include/database.h"
+#include "../include/server.h"
 
 int main() {
-    Database db;
-
-    db.set("name", "alen");
-
-    std::cout << db.get("name") << std::endl;
-
-    db.del("name");
-
-    std::cout << db.get("name") << std::endl;
+    Server server;
+    server.start(6379);
 
     return 0;
 }

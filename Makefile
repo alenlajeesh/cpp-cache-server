@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17
 
-SRC = src/main.cpp src/database.cpp
+SRC = src/main.cpp src/server.cpp src/database.cpp src/command_parser.cpp
 OUT = build/mini-redis
 
 all:
