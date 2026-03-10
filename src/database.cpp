@@ -52,6 +52,16 @@ std::string handle_command(const std::vector<std::string> &args)
 		return info.str();
 	}
 
+	if (cmd == "SAVE")
+	{
+		save_db();
+		return "OK\n";
+	}
+	if (cmd == "QUIT")
+	{
+		return "BYE\n";
+	}
+
     if (cmd == "PING")
         return "PONG\n";
 

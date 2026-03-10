@@ -43,8 +43,13 @@ void handle_client(int client)
             if (args.empty())
                 continue;
             std::string response = handle_command(args);
-
             send(client, response.c_str(), response.size(), 0);
+			if (args[0] == "QUIT"|| args[0] == "EXIT")
+            {
+                close(client);
+                log_message("Client disconnected");
+                return;
+            }
         }
     }
 	log_message("Client disconnected");
