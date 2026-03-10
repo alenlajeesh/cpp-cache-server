@@ -73,7 +73,6 @@ void Server::start(int port)
         perror("listen failed");
         exit(EXIT_FAILURE);
     }
-    std::cout << "cache-server running on port " << port << std::endl;
 	std::thread(expiration_worker).detach();
     while (true)
     {
