@@ -4,6 +4,7 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
+#include <sstream>
 std::unordered_map<std::string, std::string> store;
 std::unordered_map<std::string, std::chrono::steady_clock::time_point> expirations;
 bool is_expired(const std::string &key)
@@ -41,6 +42,15 @@ std::string handle_command(const std::vector<std::string> &args)
         return "ERROR\n";
 
     std::string cmd = args[0];
+
+	if (cmd == "INFO")
+	{
+		std::stringstream info;
+		info << "cache Server\n";
+		info << "Keys: " << store.size() << "\n";
+		info << "Version: 0.9.0\n";
+		return info.str();
+	}
 
     if (cmd == "PING")
         return "PONG\n";

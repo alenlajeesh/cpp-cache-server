@@ -6,7 +6,8 @@ SRC = src/main.cpp \
       src/database.cpp \
       src/command_parser.cpp \
       src/persistence.cpp    \
-	  src/config.cpp
+	  src/config.cpp \
+	  src/logger.cpp
 
 TARGET = build/cache-server
 

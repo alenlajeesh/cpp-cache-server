@@ -2,6 +2,7 @@
 #include "../include/database.h"
 #include "../include/command_parser.h"
 #include "../include/persistence.h"
+#include "../include/logger.h"
 
 #include <iostream>
 #include <sstream>
@@ -23,6 +24,7 @@ void expiration_worker()
 }
 void handle_client(int client)
 {
+	log_message("Client connected");
     char buffer[BUFFER_SIZE];
     while (true)
     {
@@ -37,6 +39,7 @@ void handle_client(int client)
             if (line.empty())
                 continue;
             auto args = parse_command(line);
+			log_message(line);
             if (args.empty())
                 continue;
             std::string response = handle_command(args);
@@ -44,7 +47,7 @@ void handle_client(int client)
             send(client, response.c_str(), response.size(), 0);
         }
     }
-
+	log_message("Client disconnected");
     close(client);
 }
 
