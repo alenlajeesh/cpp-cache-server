@@ -1,5 +1,7 @@
 #include "../include/server.h"
+#include "../include/database.h"
 #include "../include/command_parser.h"
+#include "../include/persistence.h"
 
 #include <iostream>
 #include <sstream>
@@ -12,54 +14,85 @@
 
 #define BUFFER_SIZE 4096
 
-void handle_client(int client_fd)
+void handle_client(int client)
 {
     char buffer[BUFFER_SIZE];
+
     while (true)
     {
         memset(buffer, 0, BUFFER_SIZE);
-        int bytes = recv(client_fd, buffer, BUFFER_SIZE, 0);
+
+        int bytes = recv(client, buffer, BUFFER_SIZE, 0);
+
         if (bytes <= 0)
             break;
+
         std::stringstream input(buffer);
         std::string line;
+
         while (std::getline(input, line))
         {
             if (line.empty())
                 continue;
-            std::string response = parse_command(line);
-            send(client_fd, response.c_str(), response.size(), 0);
+
+            auto args = parse_command(line);
+
+            if (args.empty())
+                continue;
+
+            std::string response = handle_command(args);
+
+            send(client, response.c_str(), response.size(), 0);
         }
     }
-    close(client_fd);
+
+    close(client);
 }
+
 void Server::start(int port)
 {
+    load_db();
+
+    std::cout << "Database loaded\n";
+
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd < 0)
+
+    if (server_fd == -1)
     {
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
+
     sockaddr_in address;
+
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
+
     if (bind(server_fd, (sockaddr *)&address, sizeof(address)) < 0)
     {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
-    listen(server_fd, 10);
+
+    if (listen(server_fd, 5) < 0)
+    {
+        perror("listen failed");
+        exit(EXIT_FAILURE);
+    }
+
     std::cout << "cache-server running on port " << port << std::endl;
+
     while (true)
     {
-        int client_fd = accept(server_fd, nullptr, nullptr);
-        if (client_fd < 0)
+        int client = accept(server_fd, nullptr, nullptr);
+
+        if (client < 0)
         {
             perror("accept failed");
             continue;
         }
-        std::thread(handle_client, client_fd).detach();
+
+        std::thread(handle_client, client).detach();
     }
 }
