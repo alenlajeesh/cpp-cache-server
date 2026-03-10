@@ -1,8 +1,9 @@
 #include "../include/server.h"
-
-int main() {
+#include "../include/persistence.h"
+int main()
+{
+    load_db();
     Server server;
     server.start(6379);
-
     return 0;
 }

@@ -2,11 +2,7 @@
 #define COMMAND_PARSER_H
 
 #include <string>
-#include <vector>
 
-class CommandParser {
-public:
-    std::vector<std::string> parse(const std::string& input);
-};
+std::string parse_command(const std::string &command);
 
 #endif
