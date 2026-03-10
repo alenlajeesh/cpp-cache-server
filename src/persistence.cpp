@@ -1,6 +1,5 @@
 #include "../include/persistence.h"
 #include "../include/database.h"
-
 #include <fstream>
 const std::string DB_FILE = "data/dump.rdb";
 void save_db()
