@@ -1,52 +1,37 @@
 #include "../include/command_parser.h"
-#include "../include/database.h"
-#include "../include/persistence.h"
-
 #include <sstream>
+#include <vector>
 
-std::string parse_command(const std::string &command)
+std::vector<std::string> parse_command(const std::string &input)
 {
-    std::istringstream iss(command);
-    std::string cmd;
-    iss >> cmd;
-    if (cmd == "SET")
+    std::vector<std::string> result;
+
+    if (input.empty())
+        return result;
+    if (input[0] == '*')
     {
-        std::string key, value;
-        iss >> key >> value;
-        set_key(key, value);
-        save_db();
-        return "OK\n";
+        std::istringstream stream(input);
+        std::string line;
+        std::getline(stream, line); // *num
+        while (std::getline(stream, line))
+        {
+            if (line.empty())
+                continue;
+            if (line[0] == '$')
+            {
+                std::getline(stream, line);
+                result.push_back(line);
+            }
+        }
     }
-    if (cmd == "GET")
+    else
     {
-        std::string key;
-        iss >> key;
-        std::string value = get_key(key);
-        if (value.empty())
-            return "(nil)\n";
-        return value + "\n";
+        std::istringstream iss(input);
+        std::string word;
+        while (iss >> word)
+        {
+            result.push_back(word);
+        }
     }
-    if (cmd == "DEL")
-    {
-        std::string key;
-        iss >> key;
-        int removed = del_key(key);
-        save_db();
-        return std::to_string(removed) + "\n";
-    }
-    if (cmd == "EXPIRE")
-    {
-        std::string key;
-        int seconds;
-        iss >> key >> seconds;
-        set_expire(key, seconds);
-        return "1\n";
-    }
-    if (cmd == "TTL")
-    {
-        std::string key;
-        iss >> key;
-        return std::to_string(ttl(key)) + "\n";
-    }
-    return "ERROR\n";
+    return result;
 }
