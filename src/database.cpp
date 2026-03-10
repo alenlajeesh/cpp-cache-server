@@ -1,55 +1,59 @@
 #include "../include/database.h"
+
+#include <unordered_map>
 #include <chrono>
 
-void Database::set(const std::string& key, const std::string& value) {
+static std::unordered_map<std::string, std::string> store;
+static std::unordered_map<std::string, std::chrono::steady_clock::time_point> expirations;
+
+bool key_exists(const std::string &key)
+{
+    return store.find(key) != store.end();
+}
+
+void set_key(const std::string &key, const std::string &value)
+{
     store[key] = value;
-}
-
-std::string Database::get(const std::string& key) {
-    check_expired(key);
-
-    if (store.find(key) != store.end()) {
-        return store[key];
-    }
-
-    return "(nil)";
-}
-
-bool Database::del(const std::string& key) {
     expirations.erase(key);
-    return store.erase(key) > 0;
 }
 
-bool Database::expire(const std::string& key, int seconds) {
-    if (store.find(key) == store.end())
-        return false;
+std::string get_key(const std::string &key)
+{
+    if (!key_exists(key))
+        return "";
 
+    return store[key];
+}
+
+int del_key(const std::string &key)
+{
+    int removed = store.erase(key);
+    expirations.erase(key);
+    return removed;
+}
+
+void set_expire(const std::string &key, int seconds)
+{
     expirations[key] =
-        std::chrono::steady_clock::now() +
-        std::chrono::seconds(seconds);
-
-    return true;
+        std::chrono::steady_clock::now() + std::chrono::seconds(seconds);
 }
 
-int Database::ttl(const std::string& key) {
-    check_expired(key);
-
+long ttl(const std::string &key)
+{
     if (expirations.find(key) == expirations.end())
         return -1;
 
+    auto now = std::chrono::steady_clock::now();
+
     auto remaining =
         std::chrono::duration_cast<std::chrono::seconds>(
-            expirations[key] - std::chrono::steady_clock::now());
+            expirations[key] - now)
+            .count();
 
-    return remaining.count();
+    return remaining;
 }
 
-void Database::check_expired(const std::string& key) {
-    if (expirations.find(key) == expirations.end())
-        return;
-
-    if (std::chrono::steady_clock::now() > expirations[key]) {
-        store.erase(key);
-        expirations.erase(key);
-    }
+std::unordered_map<std::string, std::string>& get_store()
+{
+    return store;
 }

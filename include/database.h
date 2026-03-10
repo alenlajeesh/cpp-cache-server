@@ -3,24 +3,19 @@
 
 #include <string>
 #include <unordered_map>
-#include <chrono>
 
-class Database {
-public:
-    void set(const std::string& key, const std::string& value);
-    std::string get(const std::string& key);
-    bool del(const std::string& key);
+bool key_exists(const std::string &key);
 
-    bool expire(const std::string& key, int seconds);
-    int ttl(const std::string& key);
+void set_key(const std::string &key, const std::string &value);
 
-private:
-    std::unordered_map<std::string, std::string> store;
+std::string get_key(const std::string &key);
 
-    std::unordered_map<std::string,
-        std::chrono::steady_clock::time_point> expirations;
+int del_key(const std::string &key);
 
-    void check_expired(const std::string& key);
-};
+void set_expire(const std::string &key, int seconds);
+
+long ttl(const std::string &key);
+
+std::unordered_map<std::string, std::string>& get_store();
 
 #endif
